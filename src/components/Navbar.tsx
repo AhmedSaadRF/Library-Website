@@ -18,6 +18,7 @@ import { MobileMenu } from './MobileMenu';
 import { LanguageToggle } from './LanguageToggle';
 import { ThemeToggle } from './ThemeToggle';
 import { CartDrawer } from './CartDrawer';
+import { Avatar } from './Avatar';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -96,12 +97,11 @@ export function Navbar() {
           {/* Right: Actions (Desktop) */}
           <div className="flex flex-1 justify-end items-center gap-2 sm:gap-4 lg:flex-none">
             
-            {/* Cart Icon (Always Visible) */}
+            {/* Cart Icon */}
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={openCart}
               className="relative rounded-full p-2.5 text-slate-700 transition-colors hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5"
-              aria-label={t('a11y.toggleCart')}
             >
               <ShoppingBag className="size-6" />
               <AnimatePresence>
@@ -124,27 +124,36 @@ export function Navbar() {
               {/* User Dropdown */}
               <NavDropdown
                 trigger={
-                  <div className="rounded-full p-2.5 text-slate-700 transition-colors hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5">
-                    <UserRound className="size-6" />
+                  <div className="cursor-pointer rounded-full p-1 transition-transform hover:scale-105 active:scale-95">
+                    {user ? (
+                      <Avatar src={user.profilePicture} name={user.name} size="md" />
+                    ) : (
+                      <div className="rounded-full p-2 text-slate-700 hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5">
+                        <UserRound className="size-6" />
+                      </div>
+                    )}
                   </div>
                 }
               >
                 {user ? (
                   <>
-                    <div className="px-4 py-3 mb-2">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        {t('misc.user')}
-                      </p>
-                      <p className="text-sm font-black text-slate-900 dark:text-white truncate">
-                        {user.name || user.email}
-                      </p>
+                    <div className="flex items-center gap-3 px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800">
+                      <Avatar src={user.profilePicture} name={user.name} size="sm" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-slate-900 dark:text-white truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-tighter">
+                          {user.email}
+                        </p>
+                      </div>
                     </div>
                     <Link
                       href="/profile"
                       className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5"
                     >
                       <User className="size-4 text-brand" />
-                      {dir === 'rtl' ? 'الملف الشخصي' : 'Profile'}
+                      {locale === 'ar' ? 'الملف الشخصي' : 'Profile'}
                     </Link>
                     {isAdmin && (
                       <Link
@@ -224,7 +233,7 @@ export function Navbar() {
         </nav>
       </header>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Menu */}
       <MobileMenu 
         isOpen={mobileOpen} 
         onClose={() => setMobileOpen(false)} 
@@ -234,7 +243,7 @@ export function Navbar() {
         }}
       />
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Modal */}
       <AnimatePresence>
         {showLogoutModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md">

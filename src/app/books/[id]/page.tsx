@@ -15,6 +15,7 @@ import {
   Users, BookMarked, Quote
 } from 'lucide-react';
 import { AnimatedBookCard } from '@/components/AnimatedBookCard';
+import { BookComments } from '@/components/BookComments';
 
 export default function BookDetailsPage() {
   const { id } = useParams();
@@ -31,12 +32,6 @@ export default function BookDetailsPage() {
   const similarBooks = useMemo(() => {
     return books.filter((b) => b.id !== id).slice(0, 3);
   }, [books, id]);
-
-  const fakeReviews = [
-    { name: 'Ahmed Ali', date: '2025-04-10', rating: 5, comment: locale === 'ar' ? 'كتاب رائع جداً، استمتعت بكل فصل فيه.' : 'Very wonderful book, I enjoyed every chapter of it.' },
-    { name: 'Sara Mohamed', date: '2025-04-12', rating: 4, comment: locale === 'ar' ? 'قصة ملهمة للغاية، أنصح الجميع بقراءتها.' : 'Extremely inspiring story, I recommend everyone read it.' },
-    { name: 'John Doe', date: '2025-04-15', rating: 5, comment: locale === 'ar' ? 'أفضل كتاب قرأته هذا العام بلا شك.' : 'The best book I\'ve read this year, without a doubt.' }
-  ];
 
   if (!book) {
     return (
@@ -189,50 +184,8 @@ export default function BookDetailsPage() {
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <section className="space-y-8 pt-12">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white">
-              {locale === 'ar' ? 'آراء القراء' : 'Reader Reviews'}
-            </h2>
-            <div className="flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-amber-600 dark:bg-amber-900/20">
-              <Star className="size-5 fill-current" />
-              <span className="font-black">4.8 / 5.0</span>
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {fakeReviews.map((review, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * i }}
-                className="rounded-[2.5rem] bg-white p-8 shadow-sm dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold">
-                      {review.name[0]}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-900 dark:text-white leading-none">{review.name}</p>
-                      <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">{review.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, starI) => (
-                      <Star key={starI} className={`size-3 ${starI < review.rating ? 'fill-amber-500 text-amber-500' : 'text-slate-200'}`} />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 italic">
-                  "{review.comment}"
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        {/* Dynamic Comments Section */}
+        <BookComments bookId={book.id} />
 
         {/* Similar Books */}
         {similarBooks.length > 0 && (
@@ -288,7 +241,6 @@ export default function BookDetailsPage() {
                     <p className="whitespace-pre-wrap text-xl leading-[2.2] text-slate-700 dark:text-slate-300">
                       {content}
                     </p>
-                    {/* Mock long text */}
                     <div className="opacity-50 mt-8">
                        <p className="leading-loose italic">{content}</p>
                        <p className="leading-loose mt-4">{content}</p>

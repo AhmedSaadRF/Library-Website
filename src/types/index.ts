@@ -46,13 +46,25 @@ export interface CartItem {
 
 export interface User {
   email: string;
-  name?: string;
+  name: string;
   role: 'user' | 'admin';
-  registeredAt?: string;
+  registeredAt: string;
+  profilePicture?: string; // base64
 }
 
 export interface StoredUser extends User {
   password: string;
+}
+
+export interface BookComment {
+  id: string;
+  bookId: string;
+  userId: string; // email
+  userName: string;
+  userImage?: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
 }
 
 export interface Order {
