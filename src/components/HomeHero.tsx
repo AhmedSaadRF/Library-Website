@@ -55,7 +55,7 @@ export function HomeHero() {
         <motion.div style={{ y, scale }} className="relative min-h-[420px] overflow-hidden rounded-[2rem]">
           <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-brand/30 via-transparent to-brand-light/30" />
           <Image
-            src="/images/library-hero.png"
+            src="/images/herolibrary.png"
             alt={t('brandSlogan')}
             fill
             priority

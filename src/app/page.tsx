@@ -44,7 +44,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="grid gap-4 sm:grid-cols-2"
             >
-              {['/images/map-hero.png', '/images/train-hero.png', '/images/books-world.png', '/images/categories.png'].map(
+              {['/images/herolibrary.png', '/images/train-hero.png', '/images/books-world.png', '/images/categories.png'].map(
                 (src, index) => (
                   <motion.div
                     key={src}

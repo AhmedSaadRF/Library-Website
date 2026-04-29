@@ -6,8 +6,11 @@ import { Navbar } from '@/components/Navbar';
 import { Providers } from '@/components/Providers';
 
 export const metadata: Metadata = {
-  title: 'Mobile Library Website',
-  description: 'Graduation project for a bilingual mobile library website.'
+  title: 'أفق - المكتبة المتنقلة | Ofoq Mobile Library',
+  description: 'Graduation project for a bilingual mobile library website.',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
