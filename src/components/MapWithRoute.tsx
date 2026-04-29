@@ -5,7 +5,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useRouteStops } from "@/contexts/RouteContext";
 import { useTranslation } from "@/contexts/LanguageContext";
-import { Calendar, Clock } from "lucide-react";
 
 // Fix Leaflet default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -97,11 +96,11 @@ export function MapWithRoute() {
           <div style="font-family:system-ui,sans-serif;min-width:200px;padding:4px">
             <strong style="font-size:16px;color:#1e293b">${name}</strong>
             <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
-              <div style="display:flex;items-center;gap:6px;font-size:12px;color:#f97316;font-weight:700">
-                <span>📅</span> ${date || '---'}
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#f97316;font-weight:700">
+                <span>📅</span> ${date}
               </div>
-              <div style="display:flex;items-center;gap:6px;font-size:12px;color:#64748b">
-                <span>⏰</span> ${time || '---'}
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b">
+                <span>⏰</span> ${time}
               </div>
             </div>
             <p style="margin:8px 0 0;font-size:13px;color:#475569;line-height:1.5">${description}</p>

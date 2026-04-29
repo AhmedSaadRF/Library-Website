@@ -32,10 +32,10 @@ export interface RouteStop {
   lng: number;
   description_ar: string;
   description_en: string;
-  date_ar?: string;
-  date_en?: string;
-  time_ar?: string;
-  time_en?: string;
+  date_ar: string;
+  date_en: string;
+  time_ar: string;
+  time_en: string;
   order: number;
 }
 

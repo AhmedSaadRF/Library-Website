@@ -17,14 +17,14 @@ interface RouteContextValue {
 
 const RouteContext = createContext<RouteContextValue | undefined>(undefined);
 
-function normalize(stops: RouteStop[]) {
+function normalize(stops: RouteStop[]): RouteStop[] {
   return [...stops]
     .sort((a, b) => a.order - b.order)
     .map((stop, index) => ({ ...stop, order: index + 1 }));
 }
 
 export function RouteProvider({ children }: { children: ReactNode }) {
-  const [stops, setStops] = useState<RouteStop[]>(defaultRoute);
+  const [stops, setStops] = useState<RouteStop[]>([]);
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,7 +34,9 @@ export function RouteProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    writeStorage('mobile-library-stops', stops);
+    if (stops.length > 0) {
+      writeStorage('mobile-library-stops', stops);
+    }
   }, [stops]);
 
   const value = useMemo<RouteContextValue>(

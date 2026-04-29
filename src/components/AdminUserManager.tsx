@@ -25,9 +25,11 @@ export function AdminUserManager() {
 
   const toggleRole = (email: string) => {
     if (email === PROTECTED_EMAIL) return;
-    const updated = users.map((u) => {
+    const updated: StoredUser[] = users.map((u) => {
       if (u.email === email) {
-        return { ...u, role: u.role === 'admin' ? 'user' : ('admin' as const) };
+        // Fix for TypeScript type inference issue during build
+        const newRole: 'user' | 'admin' = u.role === 'admin' ? 'user' : 'admin';
+        return { ...u, role: newRole };
       }
       return u;
     });
@@ -49,7 +51,7 @@ export function AdminUserManager() {
         {users.map((u) => {
           const isProtected = u.email === PROTECTED_EMAIL;
           const isSelf = u.email === currentUser?.email;
-          const regDate = u.registeredAt || '2025-01-01'; // Fallback for existing users
+          const regDate = u.registeredAt || '2025-01-01';
 
           return (
             <motion.div
@@ -98,7 +100,6 @@ export function AdminUserManager() {
                   disabled={isProtected || isSelf}
                   onClick={() => deleteUser(u.email)}
                   className="rounded-full bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-rose-900/30 dark:text-rose-300"
-                  aria-label={`${t('admin.deleteUser')} ${u.email}`}
                 >
                   {t('admin.deleteUser')}
                 </button>

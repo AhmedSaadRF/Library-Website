@@ -97,7 +97,6 @@ export function AdminRouteManager() {
                       type="button"
                       onClick={() => deleteStop(stop.id)}
                       className="rounded-full bg-rose-100 px-3 py-2 text-sm font-semibold text-rose-700"
-                      aria-label={t('a11y.deleteStop')}
                     >
                       {t('admin.delete')}
                     </button>
@@ -110,28 +109,28 @@ export function AdminRouteManager() {
 
       <motion.form
         onSubmit={submit}
-        initial="hidden"
-        animate="visible"
-        variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
         className="space-y-4 rounded-[2rem] border border-brand/10 bg-white p-6 shadow-glow dark:bg-slate-900"
       >
         <div className="grid grid-cols-2 gap-4">
           <input
+            required
             value={form.name_ar}
             onChange={(e) => setForm((current) => ({ ...current, name_ar: e.target.value }))}
-            placeholder="Arabic Stop Name"
+            placeholder="اسم المحطة (بالعربي)"
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
           <input
+            required
             value={form.name_en}
             onChange={(e) => setForm((current) => ({ ...current, name_en: e.target.value }))}
-            placeholder="English Stop Name"
+            placeholder="Stop Name (English)"
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <input
+            required
             type="number"
             step="0.0001"
             value={form.lat}
@@ -140,6 +139,7 @@ export function AdminRouteManager() {
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
           <input
+            required
             type="number"
             step="0.0001"
             value={form.lng}
@@ -151,44 +151,50 @@ export function AdminRouteManager() {
 
         <div className="grid grid-cols-2 gap-4">
           <input
-            value={form.date_ar || ''}
+            required
+            value={form.date_ar}
             onChange={(e) => setForm((current) => ({ ...current, date_ar: e.target.value }))}
-            placeholder="Arabic Date (e.g. 15 مايو)"
+            placeholder="التاريخ (مثال: 15 مايو)"
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
           <input
-            value={form.date_en || ''}
+            required
+            value={form.date_en}
             onChange={(e) => setForm((current) => ({ ...current, date_en: e.target.value }))}
-            placeholder="English Date (e.g. May 15)"
+            placeholder="Date (e.g. May 15)"
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <input
-            value={form.time_ar || ''}
+            required
+            value={form.time_ar}
             onChange={(e) => setForm((current) => ({ ...current, time_ar: e.target.value }))}
-            placeholder="Arabic Time"
+            placeholder="الوقت (بالعربي)"
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
           <input
-            value={form.time_en || ''}
+            required
+            value={form.time_en}
             onChange={(e) => setForm((current) => ({ ...current, time_en: e.target.value }))}
-            placeholder="English Time"
+            placeholder="Time (English)"
             className="w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
           />
         </div>
 
         <textarea
+          required
           value={form.description_ar}
           onChange={(e) => setForm((current) => ({ ...current, description_ar: e.target.value }))}
-          placeholder="Arabic Description"
+          placeholder="الوصف (بالعربي)"
           className="min-h-24 w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
         />
         <textarea
+          required
           value={form.description_en}
           onChange={(e) => setForm((current) => ({ ...current, description_en: e.target.value }))}
-          placeholder="English Description"
+          placeholder="Description (English)"
           className="min-h-24 w-full rounded-2xl border border-brand/15 bg-transparent px-4 py-3 outline-none ring-brand focus:ring-2"
         />
 
