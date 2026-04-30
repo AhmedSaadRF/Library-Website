@@ -163,6 +163,9 @@ export const shimmerVariants: Variants = {
 
 // --- Form Animation Components ---
 
+// Fix: Cast motion.input to accept standard HTML input props (bypassing Framer Motion's conflicting event types)
+const MotionInput = motion.input as React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>;
+
 /**
  * Animated form input with focus ring and label animation
  */
@@ -197,7 +200,7 @@ export function AnimatedInput({
           {label}
         </motion.label>
       )}
-      <motion.input
+      <MotionInput
         type={type}
         value={value}
         onChange={onChange}
