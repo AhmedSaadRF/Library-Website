@@ -14,8 +14,8 @@ export interface Book {
   title_en: string;
   author_ar: string;
   author_en: string;
-  category_ar: string;
-  category_en: string;
+  category_ar: string[];       // changed from string | string[] to string[]
+  category_en: string[];       // changed from string | string[] to string[]
   type: BookType;
   audioSrc?: string;
   price: number;
@@ -49,7 +49,7 @@ export interface User {
   name: string;
   role: 'user' | 'admin';
   registeredAt: string;
-  profilePicture?: string; // base64
+  profilePicture?: string;
 }
 
 export interface StoredUser extends User {
@@ -59,7 +59,7 @@ export interface StoredUser extends User {
 export interface BookComment {
   id: string;
   bookId: string;
-  userId: string; // email
+  userId: string;
   userName: string;
   userImage?: string;
   rating: number;
@@ -75,6 +75,19 @@ export interface Order {
   createdAt: string;
   customerName: string;
   address: string;
+  currency?: string;
+}
+
+export interface Borrowing {
+  id: string;
+  bookId: string;
+  bookTitle_ar: string;
+  bookTitle_en: string;
+  userEmail: string;
+  borrowDate: string;
+  dueDate: string;
+  duration: number;
+  status: 'active' | 'returned';
 }
 
 export interface TranslationDictionary {

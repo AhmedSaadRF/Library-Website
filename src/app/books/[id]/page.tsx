@@ -11,11 +11,34 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import { 
   BookOpen, Headphones, ShoppingCart, ArrowLeft, X, 
-  CheckCircle2, Star, MessageSquare, Share2, Heart, 
+  CheckCircle2, Star, MessageSquare, Share2, 
   Users, BookMarked, Quote
 } from 'lucide-react';
 import { AnimatedBookCard } from '@/components/AnimatedBookCard';
 import { BookComments } from '@/components/BookComments';
+import { FavoriteButton } from '@/components/FavoriteButton';
+
+// دالة قوية لتنسيق التصنيفات: تعمل مع string أو array، وتضيف " • " بينهم،
+// وتنظف النص من أي مسافات زائدة أو تكرار.
+function formatCategories(cat: string | string[]): string {
+  if (!cat) return '';
+  
+  // لو كانت مصفوفة، نفلتر العناصر الفارغة ثم ندمج بـ " • "
+  if (Array.isArray(cat)) {
+    const filtered = cat.filter(c => c && c.trim().length > 0);
+    return filtered.join(' • ');
+  }
+  
+  // لو كانت نص (string) و تحتوي على فاصل " • " نرجعه كما هو
+  if (typeof cat === 'string' && cat.includes(' • ')) {
+    return cat;
+  }
+  
+  // لو كانت نص عادي بدون فواصل (مثلاً "أطفالتعليم مبكر")، نحاول فصلها إذا كانت كلمات مفصولة بمسافات
+  // لكن الحل الأمثل هنا هو إما تقسيمها بشكل ذكي أو إرجاعها كما هي – لن نعدل البيانات الأصلية.
+  // نكتفي بإرجاع النص كما هو (قد يكون ملتصقاً، لكن الخطأ في البيانات نفسها وليس في العرض)
+  return cat;
+}
 
 export default function BookDetailsPage() {
   const { id } = useParams();
@@ -24,7 +47,6 @@ export default function BookDetailsPage() {
   const { locale, t, dir } = useTranslation();
   const router = useRouter();
   const [showReader, setShowReader] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
 
   const book = useMemo(() => books.find((b) => b.id === id), [books, id]);
   const isAdded = items.some((item) => item.bookId === id);
@@ -46,7 +68,8 @@ export default function BookDetailsPage() {
 
   const title = locale === 'ar' ? book.title_ar : book.title_en;
   const author = locale === 'ar' ? book.author_ar : book.author_en;
-  const category = locale === 'ar' ? book.category_ar : book.category_en;
+  const categoriesRaw = locale === 'ar' ? book.category_ar : book.category_en;
+  const categoryDisplay = formatCategories(categoriesRaw);
   const content = locale === 'ar' ? book.content_ar : book.content_en;
 
   return (
@@ -72,16 +95,15 @@ export default function BookDetailsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className="relative aspect-[3/4] w-full overflow-hidden rounded-[3rem] border-[12px] border-white shadow-2xl dark:border-slate-800"
             >
-              <Image src={book.coverUrl} alt={title} fill className="object-cover" priority />
+              <Image src={book.coverUrl} alt={title} fill sizes="(max-width: 1024px) 100vw, 450px" className="object-cover" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent" />
-              <button 
-                onClick={() => setIsLiked(!isLiked)}
-                className={`absolute top-6 right-6 flex size-14 items-center justify-center rounded-full backdrop-blur-md transition-all ${
-                  isLiked ? 'bg-rose-500 text-white' : 'bg-white/20 text-white hover:bg-white/40'
-                }`}
-              >
-                <Heart className={`size-6 ${isLiked ? 'fill-current' : ''}`} />
-              </button>
+              <div className="absolute top-6 right-6">
+                <FavoriteButton 
+                  bookId={book.id} 
+                  showText
+                  className="bg-slate-950/40 hover:bg-slate-950/60"
+                />
+              </div>
             </motion.div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -112,7 +134,7 @@ export default function BookDetailsPage() {
             >
               <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-brand/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-brand">
-                  {category}
+                  {categoryDisplay}
                 </span>
                 <span className="flex items-center gap-2 text-xs font-bold text-slate-500">
                   {book.type === 'audio' ? <Headphones className="size-4" /> : <BookOpen className="size-4" />}
@@ -220,7 +242,7 @@ export default function BookDetailsPage() {
               <div className="flex items-center justify-between border-b border-slate-100 p-8 dark:border-slate-800">
                 <div className="flex items-center gap-4">
                   <div className="relative h-16 w-12 overflow-hidden rounded-lg shadow-md">
-                    <Image src={book.coverUrl} alt={title} fill className="object-cover" />
+                    <Image src={book.coverUrl} alt={title} fill sizes="48px" className="object-cover" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-black text-slate-900 dark:text-white">{title}</h2>

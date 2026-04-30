@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
 import Image from 'next/image';
 
@@ -19,12 +20,17 @@ export function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) 
   };
 
   return (
-    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand/10 bg-brand/5 font-bold text-brand shadow-sm ${sizes[size]} ${className}`}>
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand/10 bg-brand/5 font-bold text-brand shadow-sm ${sizes[size]} ${className}`}
+    >
       {src ? (
-        <Image 
-          src={src} 
-          alt={name || 'User Avatar'} 
-          fill 
+        <Image
+          src={src}
+          alt={name || 'User Avatar'}
+          fill
+          sizes="(max-width: 768px) 100vw, 96px"
           className="object-cover"
         />
       ) : name ? (
@@ -32,6 +38,6 @@ export function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) 
       ) : (
         <User className="size-1/2" />
       )}
-    </div>
+    </motion.div>
   );
 }

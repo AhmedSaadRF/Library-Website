@@ -1,11 +1,14 @@
 "use client";
 
 import { AnimatedBookCard } from '@/components/AnimatedBookCard';
+import { BookActions } from '@/components/BookActions';
 import { PageShell } from '@/components/PageShell';
+import { CurrencySelector } from '@/components/CurrencySelector';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useBooks } from '@/contexts/BooksContext';
 import { useCart } from '@/contexts/CartContext';
 import { useTranslation } from '@/contexts/LanguageContext';
+import { matchesCategory } from '@/utils/categoryUtils'; // ✅ استيراد الدالة المساعدة
 import { AnimatePresence } from 'framer-motion';
 import { useMemo, useState } from 'react';
 
@@ -15,6 +18,7 @@ export default function BuyPage() {
   const { locale, t } = useTranslation();
   const [activeCategory, setActiveCategory] = useState('all');
   const [doneId, setDoneId] = useState<string | null>(null);
+  
   const filterLabels = useMemo(
     () => [
       { id: 'all', label: t('filters.all') },
@@ -25,23 +29,34 @@ export default function BuyPage() {
     ],
     [categories, locale, t]
   );
-  const filteredBooks =
-    activeCategory === 'all'
-      ? books
-      : books.filter((book) =>
-          categories.some(
-            (category) =>
-              category.id === activeCategory &&
-              (book.category_ar === category.name_ar || book.category_en === category.name_en)
-          )
-        );
+
+  // الحصول على كائن التصنيف المحدد (إذا لم يكن 'all')
+  const selectedCategory = useMemo(() => {
+    if (activeCategory === 'all') return null;
+    return categories.find(cat => cat.id === activeCategory);
+  }, [activeCategory, categories]);
+
+  const filteredBooks = useMemo(() => {
+    if (!selectedCategory) return books;
+    // فلترة الكتب: تحقق مما إذا كان التصنيف المحدد ضمن تصنيفات الكتاب (أو يساويه)
+    return books.filter(book => {
+      const arMatch = matchesCategory(book.category_ar, selectedCategory.name_ar);
+      const enMatch = matchesCategory(book.category_en, selectedCategory.name_en);
+      return arMatch || enMatch;
+    });
+  }, [books, selectedCategory]);
 
   return (
     <PageShell>
       <section className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black text-transparent gradient-text md:text-5xl">{t('buy.title')}</h1>
-          <p className="text-slate-600 dark:text-slate-300">{t('misc.searchFree')}</p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-transparent gradient-text md:text-5xl">{t('buy.title')}</h1>
+            <p className="text-slate-600 dark:text-slate-300">{t('misc.searchFree')}</p>
+          </div>
+          <div className="bg-white/50 dark:bg-slate-900/50 p-4 rounded-[2rem] border border-brand/10 backdrop-blur">
+            <CurrencySelector compact />
+          </div>
         </div>
         <div className="flex flex-wrap gap-3">
           {filterLabels.map((category) => (
@@ -65,13 +80,7 @@ export default function BuyPage() {
               <ScrollReveal key={book.id}>
                 <AnimatedBookCard
                   book={book}
-                  actionLabel={t('book.add')}
-                  actionState={doneId === book.id ? 'done' : 'idle'}
-                  onAction={() => {
-                    addToCart(book.id);
-                    setDoneId(book.id);
-                    window.setTimeout(() => setDoneId((current) => (current === book.id ? null : current)), 1200);
-                  }}
+                  extra={<BookActions bookId={book.id} />}
                 />
               </ScrollReveal>
             ))}

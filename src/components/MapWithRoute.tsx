@@ -71,7 +71,7 @@ export function MapWithRoute() {
 
         const icon = L.divIcon({
           className: "",
-          html: `<div style="
+          html: `<div class="marker-pin" style="
             background:#f97316;
             color:#fff;
             width:32px;
@@ -85,7 +85,19 @@ export function MapWithRoute() {
             font-size:13px;
             box-shadow:0 2px 8px rgba(0,0,0,0.25);
             border:2px solid #fff;
-          "><span style="transform:rotate(45deg)">${index + 1}</span></div>`,
+            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          "><span style="transform:rotate(45deg)">${index + 1}</span></div>
+          <style>
+            @keyframes bounceIn {
+              from { opacity: 0; transform: rotate(-45deg) scale(0); }
+              to { opacity: 1; transform: rotate(-45deg) scale(1); }
+            }
+            .marker-pin:hover {
+              transform: rotate(-45deg) scale(1.2) !important;
+              background: #ea580c !important;
+              transition: all 0.2s ease;
+            }
+          </style>`,
           iconSize: [32, 32],
           iconAnchor: [16, 32],
           popupAnchor: [0, -36],
@@ -111,12 +123,21 @@ export function MapWithRoute() {
       });
 
       if (positions.length > 1) {
-        L.polyline(positions, {
+        const polyline = L.polyline(positions, {
           color: "#f97316",
           weight: 4,
           opacity: 0.6,
           dashArray: "10, 10",
         }).addTo(map);
+
+        // Animate polyline dash offset
+        let offset = 0;
+        const animate = () => {
+          offset = (offset - 1) % 20;
+          polyline.setStyle({ dashOffset: offset.toString() });
+          requestAnimationFrame(animate);
+        };
+        animate();
       }
 
       const bounds = L.latLngBounds(positions);

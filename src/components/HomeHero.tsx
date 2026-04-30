@@ -25,11 +25,18 @@ export function HomeHero() {
             {t('brandSlogan')}
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl text-5xl font-black leading-[1.1] text-transparent md:text-6xl lg:text-7xl gradient-text"
           >
-            {t('hero.title')}
+            {t('hero.title').split('').map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                {char}
+              </motion.span>
+            ))}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 24 }}

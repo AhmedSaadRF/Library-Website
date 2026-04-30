@@ -87,7 +87,7 @@ export default function RegisterPage() {
                 className={`relative flex size-32 cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-brand/20 bg-slate-50 transition-all hover:border-brand/50 dark:bg-slate-800 ${image ? '' : 'border-dashed'}`}
               >
                 {image ? (
-                  <Image src={image} alt="Preview" fill className="object-cover" />
+                  <Image src={image} alt="Preview" fill sizes="128px" className="object-cover" />
                 ) : (
                   <div className="flex flex-col items-center text-slate-400">
                     <Camera className="size-8" />

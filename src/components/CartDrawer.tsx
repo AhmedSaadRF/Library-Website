@@ -84,21 +84,23 @@ export function CartDrawer() {
                       </button>
                     </div>
                     <div className="mt-3 flex items-center gap-3">
-                      <button
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
                         type="button"
                         onClick={() => updateQuantity(item.bookId, item.quantity - 1)}
                         className="rounded-full bg-brand/10 px-3 py-1 text-brand"
                       >
                         -
-                      </button>
-                      <span aria-live="polite">{item.quantity}</span>
-                      <button
+                      </motion.button>
+                      <span aria-live="polite" className="font-bold">{item.quantity}</span>
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
                         type="button"
                         onClick={() => updateQuantity(item.bookId, item.quantity + 1)}
                         className="rounded-full bg-brand/10 px-3 py-1 text-brand"
                       >
                         +
-                      </button>
+                      </motion.button>
                     </div>
                   </motion.div>
                 ))}

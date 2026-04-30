@@ -4,6 +4,7 @@ import { CustomCursor } from '@/components/CustomCursor';
 import { Footer } from '@/components/Footer';
 import { Navbar } from '@/components/Navbar';
 import { Providers } from '@/components/Providers';
+import { PageTransition } from '@/components/AnimatedComponents';
 
 export const metadata: Metadata = {
   title: 'أفق - المكتبة المتنقلة | Ofoq Mobile Library',
@@ -21,7 +22,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <div className="flex min-h-screen flex-col">
             <CustomCursor />
             <Navbar />
-            <div className="flex-1">{children}</div>
+            <div className="flex-1">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </div>
             <Footer />
           </div>
         </Providers>

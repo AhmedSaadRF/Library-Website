@@ -42,7 +42,7 @@ export default function RoutePage() {
           <aside className="order-2 space-y-4 lg:order-1">
             <div className="flex items-center gap-2 px-2 text-brand font-bold uppercase tracking-wider text-sm">
               <Navigation className="size-4" />
-              {locale === 'ar' ? 'محطات المسار' : 'Route Stations'}
+              {t('route.stations')}
             </div>
             
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">

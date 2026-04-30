@@ -6,7 +6,7 @@ import { useTranslation } from '@/contexts/LanguageContext';
 import { 
   BookOpen, LogIn, MapPinned, Menu, ShoppingBag, 
   UserRound, Settings, LogOut, User, ChevronDown, 
-  Globe, Moon, Sun, Briefcase, Home
+  Globe, Moon, Sun, Briefcase, Home, Bookmark, Heart
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
@@ -19,18 +19,25 @@ import { LanguageToggle } from './LanguageToggle';
 import { ThemeToggle } from './ThemeToggle';
 import { CartDrawer } from './CartDrawer';
 import { Avatar } from './Avatar';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { t, dir, locale } = useTranslation();
   const { user, logout, isAdmin } = useAuth();
+  const { favoritesCount } = useFavorites();
   const { items, openCart } = useCart();
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // تحديد الصورة الرمزية: للأدمن شعار الموقع، وللمستخدم العادي صورته الشخصية أو الصورة الافتراضية
+  const avatarSrc = user?.role === 'admin' 
+    ? '/images/logo.png' 
+    : (user?.profilePicture || '/images/default-avatar.png');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -58,17 +65,22 @@ export function Navbar() {
           
           {/* Left: Logo */}
           <div className="flex-1 lg:flex-none">
-            <Link href="/" className="flex items-center gap-3">
-              <Image 
-                src="/images/logo.png" 
-                alt={t('brandName')} 
-                width={48} 
-                height={48} 
-                className="h-10 w-10 sm:h-12 sm:w-12" 
-                priority 
-              />
+            <Link href="/" className="flex items-center gap-3 group">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              >
+                <Image 
+                  src="/images/logo.png" 
+                  alt={t('brandName')} 
+                  width={48} 
+                  height={48} 
+                  className="h-10 w-10 sm:h-12 sm:w-12" 
+                  priority 
+                />
+              </motion.div>
               <div className="hidden sm:block">
-                <p className="text-base font-black text-brand dark:text-brand-light leading-none">
+                <p className="text-base font-black text-brand dark:text-brand-light leading-none group-hover:text-brand-dark transition-colors">
                   {t('brandName')}
                 </p>
                 <p className="mt-1 text-[9px] text-slate-500 font-bold uppercase tracking-tighter">
@@ -79,24 +91,55 @@ export function Navbar() {
           </div>
 
           {/* Center: Navigation Links (Desktop) */}
-          <div className="hidden lg:flex items-center gap-1 rounded-full bg-white/40 p-1 border border-white/20 dark:bg-slate-900/40">
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`rounded-full px-6 py-2 text-sm font-bold transition-all ${pathname === href
-                    ? 'bg-brand text-white shadow-lg'
-                    : 'text-slate-700 hover:text-brand dark:text-slate-200 dark:hover:text-brand-light'
-                  }`}
-              >
-                {label}
-              </Link>
-            ))}
+          <div className="hidden lg:flex items-center gap-1 rounded-full bg-white/40 p-1 border border-white/20 dark:bg-slate-900/40 backdrop-blur-md">
+            {navLinks.map(({ href, label }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className="relative rounded-full px-6 py-2 text-sm font-bold transition-all"
+                >
+                  <span className={`relative z-10 transition-colors ${active ? 'text-white' : 'text-slate-700 hover:text-brand dark:text-slate-200 dark:hover:text-brand-light'}`}>
+                    {label}
+                  </span>
+                  {active && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      className="absolute inset-0 rounded-full bg-brand shadow-lg"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right: Actions (Desktop) */}
           <div className="flex flex-1 justify-end items-center gap-2 sm:gap-4 lg:flex-none">
             
+            {/* Favorites Icon */}
+            <Link href="/favorites">
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                className="relative rounded-full p-2.5 text-slate-700 transition-colors hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5"
+              >
+                <Heart className="size-6" />
+                <AnimatePresence>
+                  {favoritesCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="absolute top-1 right-1 flex size-5 items-center justify-center rounded-full bg-brand text-[10px] font-black text-white"
+                    >
+                      {favoritesCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </Link>
+
             {/* Cart Icon */}
             <motion.button
               whileTap={{ scale: 0.95 }}
@@ -126,7 +169,7 @@ export function Navbar() {
                 trigger={
                   <div className="cursor-pointer rounded-full p-1 transition-transform hover:scale-105 active:scale-95">
                     {user ? (
-                      <Avatar src={user.profilePicture} name={user.name} size="md" />
+                      <Avatar src={avatarSrc} name={user.name} size="md" />
                     ) : (
                       <div className="rounded-full p-2 text-slate-700 hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5">
                         <UserRound className="size-6" />
@@ -138,7 +181,7 @@ export function Navbar() {
                 {user ? (
                   <>
                     <div className="flex items-center gap-3 px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800">
-                      <Avatar src={user.profilePicture} name={user.name} size="sm" />
+                      <Avatar src={avatarSrc} name={user.name} size="sm" />
                       <div className="min-w-0">
                         <p className="text-sm font-black text-slate-900 dark:text-white truncate">
                           {user.name}
@@ -154,6 +197,13 @@ export function Navbar() {
                     >
                       <User className="size-4 text-brand" />
                       {locale === 'ar' ? 'الملف الشخصي' : 'Profile'}
+                    </Link>
+                    <Link
+                      href="/profile?tab=borrowings"
+                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-brand/5 dark:text-slate-200 dark:hover:bg-white/5"
+                    >
+                      <Bookmark className="size-4 text-brand" />
+                      {t('borrow.myBorrowings')}
                     </Link>
                     {isAdmin && (
                       <Link

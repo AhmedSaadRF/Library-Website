@@ -1,11 +1,13 @@
 "use client";
 
 import { useTranslation } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Book } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircle2, Headphones } from 'lucide-react';
+import { FavoriteButton } from './FavoriteButton';
 import { ReactNode } from 'react';
 
 export function AnimatedBookCard({
@@ -22,9 +24,12 @@ export function AnimatedBookCard({
   extra?: ReactNode;
 }) {
   const { locale, t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const title = locale === 'ar' ? book.title_ar : book.title_en;
   const author = locale === 'ar' ? book.author_ar : book.author_en;
-  const category = locale === 'ar' ? book.category_ar : book.category_en;
+  const categoryRaw = locale === 'ar' ? book.category_ar : book.category_en;
+  // تنسيق التصنيفات: إذا كانت مصفوفة ندمجها بـ " • "، وإلا نستخدمها كـ string
+  const category = Array.isArray(categoryRaw) ? categoryRaw.join(' • ') : categoryRaw;
 
   return (
     <motion.article
@@ -36,6 +41,7 @@ export function AnimatedBookCard({
       transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       className="group relative overflow-hidden rounded-[2rem] border border-white/30 bg-white/70 shadow-glow backdrop-blur dark:bg-slate-900/60"
     >
+      {/* باقي الكود كما هو دون تغيير */}
       <motion.div
         aria-hidden="true"
         className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -50,6 +56,9 @@ export function AnimatedBookCard({
       <Link href={`/books/${book.id}`}>
         <div className="relative h-72 overflow-hidden">
           <Image src={book.coverUrl} alt={title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-110" />
+          <div className="absolute top-4 right-4 z-10">
+            <FavoriteButton bookId={book.id} className="bg-white/80 dark:bg-slate-900/80 shadow-lg backdrop-blur-sm" />
+          </div>
         </div>
         <div className="relative space-y-4 p-5 pb-0">
           <div>
@@ -65,7 +74,7 @@ export function AnimatedBookCard({
             {book.type === 'audio' ? <Headphones className="size-4" /> : null}
             {book.type === 'audio' ? t('book.audioType') : t('book.regularType')}
           </span>
-          <span className="font-bold text-brand dark:text-brand-light">${book.price}</span>
+          <span className="font-black text-brand dark:text-brand-light">{formatPrice(book.price)}</span>
         </div>
         {extra}
         {onAction && actionLabel ? (

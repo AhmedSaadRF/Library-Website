@@ -4,6 +4,7 @@ import { AdminBookManager } from '@/components/AdminBookManager';
 import { AdminCategoryManager } from '@/components/AdminCategoryManager';
 import { AdminRouteManager } from '@/components/AdminRouteManager';
 import { AdminUserManager } from '@/components/AdminUserManager';
+import { AdminBorrowingManager } from '@/components/AdminBorrowingManager';
 import { PageShell } from '@/components/PageShell';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/LanguageContext';
@@ -11,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-type Tab = 'books' | 'route' | 'categories' | 'users';
+type Tab = 'books' | 'route' | 'categories' | 'users' | 'borrowings';
 
 export default function AdminDashboardPage() {
   const { t } = useTranslation();
@@ -37,7 +38,8 @@ export default function AdminDashboardPage() {
     { key: 'books', label: t('admin.books') },
     { key: 'categories', label: t('admin.categories') },
     { key: 'route', label: t('admin.route') },
-    { key: 'users', label: t('admin.users') }
+    { key: 'users', label: t('admin.users') },
+    { key: 'borrowings', label: t('borrow.myBorrowings') }
   ];
 
   return (
@@ -82,6 +84,7 @@ export default function AdminDashboardPage() {
           {tab === 'categories' && <AdminCategoryManager />}
           {tab === 'route' && <AdminRouteManager />}
           {tab === 'users' && <AdminUserManager />}
+          {tab === 'borrowings' && <AdminBorrowingManager />}
         </motion.div>
       </section>
     </PageShell>
