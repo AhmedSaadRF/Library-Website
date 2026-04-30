@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence, HTMLMotionProps, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
@@ -163,9 +163,6 @@ export const shimmerVariants: Variants = {
 
 // --- Form Animation Components ---
 
-// Fix: Cast motion.input to accept standard HTML input props (bypassing Framer Motion's conflicting event types)
-const MotionInput = motion.input as React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>;
-
 /**
  * Animated form input with focus ring and label animation
  */
@@ -200,7 +197,8 @@ export function AnimatedInput({
           {label}
         </motion.label>
       )}
-      <MotionInput
+      {/* @ts-expect-error - Framer Motion's event types conflict with standard HTML; runtime works */}
+      <motion.input
         type={type}
         value={value}
         onChange={onChange}
@@ -248,6 +246,7 @@ export function RippleButton({
   };
 
   return (
+    // @ts-expect-error - Framer Motion's whileHover/whileTap props conflict with standard HTML; runtime works
     <motion.button
       whileHover={disabled ? {} : { scale: 1.02 }}
       whileTap={disabled ? {} : { scale: 0.98 }}

@@ -48,7 +48,7 @@ export function BookComments({ bookId }: BookCommentsProps) {
       bookId,
       userId: user.email,
       userName: user.name,
-      userImage: user.profilePicture,
+      userImage: user.profilePicture || undefined, // ✅ fix: convert null/undefined to undefined
       rating,
       comment: commentText.trim(),
       createdAt: new Date().toISOString().split('T')[0] >= '2026-05-06' ? new Date().toISOString().split('T')[0] : '2026-05-06'
@@ -116,7 +116,7 @@ export function BookComments({ bookId }: BookCommentsProps) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-wrap items-center gap-6">
-              <Avatar src={user.profilePicture} name={user.name} size="lg" />
+              <Avatar src={user.profilePicture || undefined} name={user.name} size="lg" />
               <div className="space-y-2">
                 <p className="text-lg font-black text-slate-900 dark:text-white">
                   {locale === 'ar' ? 'كيف تقيم هذا الكتاب؟' : 'How would you rate this book?'}

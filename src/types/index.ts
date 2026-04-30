@@ -14,8 +14,8 @@ export interface Book {
   title_en: string;
   author_ar: string;
   author_en: string;
-  category_ar: string[];       // changed from string | string[] to string[]
-  category_en: string[];       // changed from string | string[] to string[]
+  category_ar: string[];
+  category_en: string[];
   type: BookType;
   audioSrc?: string;
   price: number;
@@ -45,11 +45,12 @@ export interface CartItem {
 }
 
 export interface User {
+  id: string;                     // أضفنا هذه الخاصية
   email: string;
   name: string;
   role: 'user' | 'admin';
   registeredAt: string;
-  profilePicture?: string;
+  profilePicture?: string | null; // يمكن أن تكون null
 }
 
 export interface StoredUser extends User {
