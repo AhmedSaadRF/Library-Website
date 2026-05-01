@@ -322,7 +322,7 @@ export function HomeHero() {
             transition={{ duration: animationDuration + 0.1, type: 'spring', stiffness: 80 }}
             className="flex-1 flex justify-center items-center"
           >
-            <div className="relative group w-full max-w-lg">
+            <div className="relative group h-96 w-96 md:h-[500px] md:w-[500px] lg:h-[600px] lg:w-[600px]">
               {/* التوهج الخلفي */}
               {!shouldReduceMotion && (
                 <motion.div
@@ -333,13 +333,13 @@ export function HomeHero() {
               )}
 
               {/* الصورة */}
-              <div className="relative mx-auto h-80 w-80 md:h-96 md:w-96 lg:h-full lg:w-full lg:max-w-md overflow-hidden rounded-3xl shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50 backdrop-blur">
+              <div className="relative w-full h-full overflow-hidden rounded-3xl shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50 backdrop-blur">
                 <Image
                   src="/images/herolibrary.png"
                   alt={locale === 'ar' ? 'المكتبة المتنقلة' : 'Mobile Library'}
                   fill
-                  sizes="(max-width: 768px) 90vw, 50vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-125"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 500px, 600px"
                   priority
                 />
 
