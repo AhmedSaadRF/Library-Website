@@ -5,36 +5,77 @@ import { useBooks } from '@/contexts/BooksContext';
 import { useRouteStops } from '@/contexts/RouteContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBorrow } from '@/contexts/BorrowContext';
-import { motion, useInView } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 
-// عداد متحرك بسيط وآمن
-function AnimatedCounter({ value, duration = 2 }: { value: number; duration?: number }) {
+// عداد متحرك محسّن مع دعم تقليل الحركة
+function AnimatedCounter({
+  value,
+  duration = 2,
+  delay = 0
+}: {
+  value: number;
+  duration?: number;
+  delay?: number;
+}) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
+  const shouldReduceMotion = useReducedMotion();
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    if (isInView && value !== undefined) {
-      let start = 0;
-      const increment = value / (duration * 60);
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= value) {
-          setCount(value);
-          clearInterval(timer);
-        } else {
-          setCount(Math.floor(start));
-        }
-      }, 16);
-      return () => clearInterval(timer);
+    if (!isInView || value === undefined || value === 0) {
+      setCount(value ?? 0);
+      return;
     }
-  }, [isInView, value, duration]);
 
-  if (value === undefined) return <span>0</span>;
-  return <span ref={ref}>{count}</span>;
+    if (shouldReduceMotion) {
+      setCount(value);
+      return;
+    }
+
+    let frameId: number;
+    let startTime: number | null = null;
+    let start = 0;
+
+    const animate = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime;
+      const elapsed = (currentTime - startTime) / 1000;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const newCount = Math.floor(value * progress);
+      setCount(newCount);
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(animate);
+      } else {
+        setCount(value);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      frameId = requestAnimationFrame(animate);
+    }, delay * 1000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      cancelAnimationFrame(frameId);
+    };
+  }, [isInView, value, duration, delay, shouldReduceMotion]);
+
+  return (
+    <span
+      ref={ref}
+      className="tabular-nums"
+      role="status"
+      aria-live="polite"
+    >
+      {count}
+    </span>
+  );
 }
 
 export function HomeHero() {
@@ -43,120 +84,319 @@ export function HomeHero() {
   const { stops } = useRouteStops();
   const { totalUsers } = useAuth();
   const { activeBorrowingsCount } = useBorrow();
+  const shouldReduceMotion = useReducedMotion();
 
-  const stats = [
-    { label: t('hero.statBooks'), value: books.length, suffix: '+', color: 'from-amber-500/20 to-brand/20' },
-    { label: t('hero.statStations'), value: stops.length, suffix: '', color: 'from-sky-500/20 to-blue-500/20' },
-    { label: t('hero.statReaders'), value: totalUsers, suffix: '+', color: 'from-emerald-500/20 to-teal-500/20' },
-    { label: t('hero.statBorrowings'), value: activeBorrowingsCount, suffix: '', color: 'from-rose-500/20 to-orange-500/20' },
-  ];
+  // إعدادات الـ animations
+  const animationDuration = shouldReduceMotion ? 0.3 : 0.6;
+  const animationDelay = shouldReduceMotion ? 0 : 0.2;
 
-  // تأكد من أن القيم أرقام صحيحة
-  const safeStats = stats.map(s => ({ ...s, value: typeof s.value === 'number' ? s.value : 0 }));
+  const stats = useMemo(() => [
+    {
+      label: t('hero.statBooks'),
+      value: Math.max(0, books.length ?? 0),
+      suffix: '+',
+      icon: '📚',
+      color: 'from-amber-500/20 to-amber-600/20',
+      lightColor: 'from-amber-400 to-amber-500'
+    },
+    {
+      label: t('hero.statStations'),
+      value: Math.max(0, stops.length ?? 0),
+      suffix: '',
+      icon: '🏠',
+      color: 'from-sky-500/20 to-blue-500/20',
+      lightColor: 'from-sky-400 to-blue-500'
+    },
+    {
+      label: t('hero.statReaders'),
+      value: Math.max(0, totalUsers ?? 0),
+      suffix: '+',
+      icon: '👥',
+      color: 'from-emerald-500/20 to-teal-500/20',
+      lightColor: 'from-emerald-400 to-teal-500'
+    },
+    {
+      label: t('hero.statBorrowings'),
+      value: Math.max(0, activeBorrowingsCount ?? 0),
+      suffix: '',
+      icon: '📖',
+      color: 'from-rose-500/20 to-orange-500/20',
+      lightColor: 'from-rose-400 to-orange-500'
+    },
+  ], [t, books.length, stops.length, totalUsers, activeBorrowingsCount]);
+
+  // اتجاه النص والمحاذاة
+  const isRTL = dir === 'rtl';
 
   return (
-    <section className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-white/80 to-brand/5 p-6 shadow-glow backdrop-blur dark:from-slate-950/80 dark:to-brand/10 md:p-10 lg:p-16">
-      {/* زخارف خلفية متحركة */}
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/80 via-white/40 to-brand/5 p-6 shadow-lg backdrop-blur-md dark:from-slate-950/80 dark:via-slate-900/40 dark:to-brand/10 md:p-10 lg:p-16">
+      {/* الخلفية المتحركة - الكرات الضبابية */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.5, scale: 1 }}
-        transition={{ duration: 8, repeat: Infinity, repeatType: 'reverse' }}
-        className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-brand/5 blur-3xl"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: shouldReduceMotion ? 0.3 : 0.4, scale: 1 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 8, repeat: Infinity, repeatType: 'reverse' }}
+        className="absolute -top-32 -left-32 h-80 w-80 rounded-full bg-gradient-to-br from-brand/20 to-brand/5 blur-3xl"
+        aria-hidden="true"
       />
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.5, scale: 1 }}
-        transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse', delay: 2 }}
-        className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-amber-500/5 blur-3xl"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: shouldReduceMotion ? 0.3 : 0.4, scale: 1 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 10, repeat: Infinity, repeatType: 'reverse', delay: 2 }}
+        className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-gradient-to-br from-amber-500/10 to-orange-500/5 blur-3xl"
+        aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl">
-        {/* تخطيط مرن باستخدام flex (بديل عن grid لتجنب مشاكل RTL) */}
-        <div className="flex flex-col-reverse gap-12 lg:flex-row lg:items-center">
-          {/* العمود الأيسر: النصوص والأزرار */}
+      {/* الشرارات الزخرفية الإضافية */}
+      {!shouldReduceMotion && (
+        <>
           <motion.div
-            initial={{ opacity: 0, x: dir === 'rtl' ? 40 : -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className={`flex-1 space-y-6 ${dir === 'rtl' ? 'text-right' : 'text-left'} text-center lg:text-left`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', delay: 4 }}
+            className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full bg-gradient-to-br from-emerald-500/5 to-teal-500/5 blur-2xl"
+            aria-hidden="true"
+          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.3 }}
+            transition={{ duration: 15, repeat: Infinity, repeatType: 'reverse', delay: 6 }}
+            className="absolute bottom-1/4 left-1/3 h-60 w-60 rounded-full bg-gradient-to-br from-purple-500/5 to-pink-500/5 blur-3xl"
+            aria-hidden="true"
+          />
+        </>
+      )}
+
+      <div className="relative z-10 mx-auto max-w-7xl">
+        {/* القسم العلوي - النص والصورة */}
+        <div className={`flex flex-col gap-12 ${isRTL ? 'lg:flex-row-reverse' : 'lg:flex-row'} lg:items-center`}>
+
+          {/* العمود اليساري: العنوان والنص والأزرار */}
+          <motion.div
+            initial={{ opacity: 0, x: isRTL ? 40 : -40, y: 20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: animationDuration, delay: 0.1 }}
+            className={`flex-1 space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}
           >
-            <h1 className="hero-gradient-text gradient-text text-4xl font-black leading-tight md:text-5xl lg:text-6xl xl:text-7xl">
-              {locale === 'ar' ? t('brandSlogan') : t('brandSloganAlt')}
-            </h1>
-            <p className="text-base text-slate-700 dark:text-slate-300 md:text-lg">
-              {t('hero.subtitle')}
-            </p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              {t('hero.extraDescription')}
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 pt-4 lg:justify-start">
-              <Link
-                href="/buy"
-                className="group relative overflow-hidden rounded-full bg-gradient-to-r from-brand to-amber-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:scale-105 md:px-6 md:py-3"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  <span>{t('hero.ctaBuy')}</span>
+            {/* العنوان الرئيسي مع تأثير gradient */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: animationDuration, delay: 0.2 }}
+            >
+              <h1 className="relative inline-block text-4xl font-black leading-tight md:text-5xl lg:text-6xl xl:text-7xl">
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-brand via-amber-600 to-orange-600 bg-clip-text text-transparent blur-sm opacity-75"
+                  animate={shouldReduceMotion ? {} : { opacity: [0.75, 1, 0.75] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  aria-hidden="true"
+                >
+                  {locale === 'ar' ? t('brandSlogan') : t('brandSloganAlt')}
+                </motion.span>
+                <span className="relative bg-gradient-to-r from-brand via-amber-600 to-orange-600 bg-clip-text text-transparent">
+                  {locale === 'ar' ? t('brandSlogan') : t('brandSloganAlt')}
                 </span>
-              </Link>
-              <Link
-                href="/books"
-                className="rounded-full border border-brand/30 bg-white/80 px-5 py-2.5 text-sm font-bold text-brand shadow-md backdrop-blur transition-all hover:scale-105 dark:bg-slate-900/80 dark:text-brand-light md:px-6 md:py-3"
-              >
-                {t('hero.ctaBooks')}
-              </Link>
-              <Link
-                href="/route"
-                className="rounded-full border border-brand/30 bg-white/80 px-5 py-2.5 text-sm font-bold text-brand shadow-md backdrop-blur transition-all hover:scale-105 dark:bg-slate-900/80 dark:text-brand-light md:px-6 md:py-3"
-              >
-                {t('hero.ctaRoute')}
-              </Link>
-            </div>
+              </h1>
+            </motion.div>
+
+            {/* النص الثانوي */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: animationDuration, delay: 0.3 }}
+              className="space-y-3"
+            >
+              <p className="max-w-xl text-base text-slate-700 dark:text-slate-300 md:text-lg leading-relaxed">
+                {t('hero.subtitle')}
+              </p>
+              <p className="max-w-xl text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                {t('hero.extraDescription')}
+              </p>
+            </motion.div>
+
+            {/* أزرار الـ CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: animationDuration, delay: 0.4 }}
+              className={`flex flex-wrap gap-4 pt-6 ${isRTL ? 'justify-end' : 'justify-start'}`}
+            >
+              {/* زر الشراء الرئيسي */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/buy"
+                  className="group relative px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg text-white shadow-xl overflow-hidden transition-all duration-300"
+                >
+                  {/* الخلفية المتحركة */}
+                  <span className="absolute inset-0 bg-gradient-to-r from-brand via-amber-600 to-orange-600 transition-all duration-300" />
+                  {!shouldReduceMotion && (
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      animate={{ x: ['100%', '-100%'] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
+                  <span className="relative flex items-center gap-2">
+                    <span>🛍️</span>
+                    <span>{t('hero.ctaBuy')}</span>
+                  </span>
+                </Link>
+              </motion.div>
+
+              {/* زر المكتبة */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/books"
+                  className="group relative px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg text-brand dark:text-brand-light bg-white/70 dark:bg-slate-900/70 backdrop-blur border-2 border-brand/30 shadow-lg hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all duration-300"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>📚</span>
+                    <span>{t('hero.ctaBooks')}</span>
+                  </span>
+                </Link>
+              </motion.div>
+
+              {/* زر الطريق */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/route"
+                  className="group relative px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg text-brand dark:text-brand-light bg-white/70 dark:bg-slate-900/70 backdrop-blur border-2 border-brand/30 shadow-lg hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all duration-300"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>🗺️</span>
+                    <span>{t('hero.ctaRoute')}</span>
+                  </span>
+                </Link>
+              </motion.div>
+            </motion.div>
           </motion.div>
 
-          {/* العمود الأيمن: صورة المكتبة */}
+          {/* العمود الأيمن: صورة المكتبة مع تأثيرات */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotateY: -5 }}
+            initial={{ opacity: 0, scale: 0.8, rotateY: -10 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-            transition={{ duration: 0.7, type: 'spring', stiffness: 100 }}
-            className="flex-1"
+            transition={{ duration: animationDuration + 0.1, type: 'spring', stiffness: 80 }}
+            className="flex-1 flex justify-center"
           >
-            <div className="relative mx-auto h-64 w-64 overflow-hidden rounded-2xl shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50 md:h-80 md:w-80 lg:h-96 lg:w-96">
-              <Image
-                src="/images/herolibrary.png"
-                alt={locale === 'ar' ? 'المكتبة المتنقلة' : 'Mobile Library'}
-                fill
-                sizes="(max-width: 768px) 80vw, 40vw"
-                className="object-cover transition-transform duration-500 hover:scale-105"
-                priority
-              />
+            <div className="relative group">
+              {/* التوهج الخلفي */}
+              {!shouldReduceMotion && (
+                <motion.div
+                  className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-brand/30 via-amber-500/20 to-orange-500/30 blur-2xl opacity-75 group-hover:opacity-100 transition-opacity"
+                  animate={{ scale: [0.95, 1.05, 0.95] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                />
+              )}
+
+              {/* الصورة */}
+              <div className="relative mx-auto h-64 w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 overflow-hidden rounded-3xl shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50 backdrop-blur">
+                <Image
+                  src="/images/herolibrary.png"
+                  alt={locale === 'ar' ? 'المكتبة المتنقلة' : 'Mobile Library'}
+                  fill
+                  sizes="(max-width: 768px) 80vw, 40vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  priority
+                />
+
+                {/* طبقة overlay متحركة */}
+                {!shouldReduceMotion && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-tr from-brand/0 via-white/0 to-white/20"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                )}
+              </div>
             </div>
           </motion.div>
         </div>
 
-        {/* إحصائيات ملونة مع عداد متحرك */}
+        {/* الإحصائيات المتحركة */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-4"
+          transition={{ duration: animationDuration, delay: animationDelay + 0.5 }}
+          className="mt-16 md:mt-20 grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6"
         >
-          {safeStats.map((stat, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.color} p-1 backdrop-blur-sm transition-all`}
-            >
-              <div className="h-full rounded-2xl bg-white/60 p-4 text-center dark:bg-slate-900/60">
-                <p className="text-2xl font-black text-slate-900 dark:text-white md:text-3xl">
-                  <AnimatedCounter value={stat.value} />
-                  {stat.suffix}
-                </p>
-                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {stat.label}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+          <AnimatePresence>
+            {stats.map((stat, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{
+                  duration: animationDuration,
+                  delay: animationDelay + (idx * 0.1)
+                }}
+                whileHover={shouldReduceMotion ? {} : { y: -8, scale: 1.05 }}
+                className="group relative overflow-hidden"
+              >
+                {/* البطاقة الخارجية مع الـ gradient */}
+                <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.color} p-1 backdrop-blur-sm transition-all`}>
+                  {/* الخلفية المتحركة داخل الـ gradient */}
+                  {!shouldReduceMotion && (
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-r ${stat.lightColor}`}
+                      animate={{ opacity: [0, 0.1, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+
+                  {/* محتوى البطاقة */}
+                  <div className="relative h-full rounded-2xl bg-white/60 dark:bg-slate-900/60 p-6 md:p-8 text-center backdrop-blur-sm transition-all duration-300 group-hover:bg-white/80 dark:group-hover:bg-slate-800/80">
+
+                    {/* الأيقونة */}
+                    <motion.div
+                      className="text-3xl md:text-4xl mb-3"
+                      animate={shouldReduceMotion ? {} : { scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: idx * 0.2 }}
+                    >
+                      {stat.icon}
+                    </motion.div>
+
+                    {/* الرقم */}
+                    <motion.p
+                      className="text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-gradient-to-r bg-clip-text"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`
+                      }}
+                      animate={shouldReduceMotion ? {} : { scale: [1, 1.05, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: idx * 0.15 }}
+                    >
+                      <span className={`bg-gradient-to-r ${stat.lightColor} bg-clip-text text-transparent`}>
+                        <AnimatedCounter
+                          value={stat.value}
+                          duration={2 + (idx * 0.3)}
+                          delay={idx * 0.1}
+                        />
+                      </span>
+                      {stat.suffix}
+                    </motion.p>
+
+                    {/* الوصف */}
+                    <motion.p
+                      className="mt-3 text-xs md:text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 + idx * 0.1 }}
+                    >
+                      {stat.label}
+                    </motion.p>
+
+                    {/* خط ديناميكي أسفل البطاقة */}
+                    {!shouldReduceMotion && (
+                      <motion.div
+                        className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${stat.lightColor}`}
+                        initial={{ width: '0%' }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 1.5, delay: 0.3 + idx * 0.1 }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
       </div>
     </section>
