@@ -83,6 +83,56 @@ select {
   animation: routeDash 3.5s linear forwards;
 }
 
+/* ========== إصلاح النص المتدرج (Gradient Text) لأجهزة iOS ========== */
+.gradient-text,
+.hero-gradient-text,
+h1.gradient-text,
+.hero-title {
+  display: inline-block !important;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-decoration: none;
+  white-space: normal;
+  word-break: keep-all;        /* يمنع كسر الكلمات العربية */
+  overflow-wrap: break-word;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em;
+  font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ضبط أي h1 يحتوي على النص الرئيسي */
+h1.hero-title {
+  display: block !important;
+  text-align: center;
+}
+
+/* منع أي سلوك غير مرغوب من Tailwind على هذه العناصر */
+.gradient-text *,
+.hero-gradient-text * {
+  display: inline-block;
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* إصلاح عام للنصوص العربية الطويلة */
+.arabic-text {
+  word-break: keep-all;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+/* ضبط الخطوط الافتراضية للنصوص العربية */
+body, h1, h2, h3, .arabic-text {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Cairo', sans-serif;
+}
+
+/* ========== نهاية الإصلاح ========== */
+
 .gradient-text {
   background: linear-gradient(90deg, #8b5a2b, #d4b07b, #5f3b1f, #9aa341);
   background-size: 220% 220%;

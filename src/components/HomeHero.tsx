@@ -1,76 +1,65 @@
 "use client";
 
 import { useTranslation } from '@/contexts/LanguageContext';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from 'next/image';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useRef } from 'react';
 
 export function HomeHero() {
-  const { t } = useTranslation();
-  const ref = useRef<HTMLDivElement | null>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 50]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const { t, locale } = useTranslation();
 
   return (
-    <section ref={ref} className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/50 px-6 py-10 shadow-glow backdrop-blur dark:bg-slate-950/40 md:px-10 lg:px-12 lg:py-14">
-      <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.95fr]">
-        <div className="space-y-6">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex rounded-full border border-brand/20 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand dark:text-brand-light"
-          >
-            {t('brandSlogan')}
-          </motion.p>
-          <motion.h1
-            className="max-w-3xl text-5xl font-black leading-[1.1] text-transparent md:text-6xl lg:text-7xl gradient-text"
-          >
-            {t('hero.title').split('').map((char, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                {char}
-              </motion.span>
-            ))}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="max-w-2xl text-lg leading-8 text-slate-700 dark:text-slate-200"
-          >
-            {t('hero.subtitle')}
-          </motion.p>
-          <div className="flex flex-wrap gap-3">
-            {[['/books', t('hero.ctaBooks')], ['/buy', t('hero.ctaBuy')], ['/route', t('hero.ctaRoute')]].map(
-              ([href, label], index) => (
-                <motion.div key={href} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 + index * 0.06 }}>
-                  <Link href={href} className={`inline-flex rounded-full px-6 py-3 text-sm font-semibold ${index === 0 ? 'bg-brand text-white' : 'border border-brand/20 bg-white/60 text-brand dark:bg-slate-900/40 dark:text-brand-light'}`}>
-                    {label}
-                  </Link>
-                </motion.div>
-              )
-            )}
-          </div>
-        </div>
+    <section className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-white/80 to-brand/5 p-8 shadow-glow backdrop-blur dark:from-slate-950/80 dark:to-brand/10 md:p-16">
+      <div className="relative z-10 mx-auto max-w-4xl text-center">
+        {/* Hero Title – النص الرئيسي */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="hero-gradient-text gradient-text text-5xl font-black leading-tight md:text-7xl lg:text-8xl"
+        >
+          {locale === 'ar' ? 'في كل محطة حكاية' : 'Every Station Has a Story'}
+        </motion.h1>
 
-        <motion.div style={{ y, scale }} className="relative min-h-[420px] overflow-hidden rounded-[2rem]">
-          <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-brand/30 via-transparent to-brand-light/30" />
-          <Image
-            src="/images/herolibrary.png"
-            alt={t('brandSlogan')}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 45vw"
-            className="rounded-[2rem] object-cover"
-          />
+        {/* Hero Subtitle – نص عادي (لا يحتاج إصلاحاً خاصاً) */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="mx-auto mt-6 max-w-2xl text-lg text-slate-700 dark:text-slate-300 md:text-xl"
+        >
+          {t('hero.subtitle')}
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="mt-10 flex flex-wrap justify-center gap-4"
+        >
+          <Link
+            href="/buy"
+            className="rounded-full bg-brand px-8 py-4 text-sm font-black text-white shadow-glow transition-all hover:scale-105 hover:shadow-xl"
+          >
+            {t('hero.ctaBuy')}
+          </Link>
+          <Link
+            href="/books"
+            className="rounded-full bg-white/80 px-8 py-4 text-sm font-black text-brand shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-white dark:bg-slate-900/80 dark:hover:bg-slate-900"
+          >
+            {t('hero.ctaBooks')}
+          </Link>
+          <Link
+            href="/route"
+            className="rounded-full bg-white/80 px-8 py-4 text-sm font-black text-brand shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-white dark:bg-slate-900/80 dark:hover:bg-slate-900"
+          >
+            {t('hero.ctaRoute')}
+          </Link>
         </motion.div>
       </div>
+
+      {/* عناصر زخرفية اختيارية */}
+      <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-brand/5 blur-3xl" />
+      <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-amber-500/5 blur-3xl" />
     </section>
   );
 }
