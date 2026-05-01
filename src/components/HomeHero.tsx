@@ -322,7 +322,7 @@ export function HomeHero() {
             transition={{ duration: animationDuration + 0.1, type: 'spring', stiffness: 80 }}
             className="flex-1 flex justify-center items-center"
           >
-            <div className="relative group h-96 w-96 md:h-[500px] md:w-[500px] lg:h-[600px] lg:w-[600px]">
+            <div className="relative group h-72 w-72 md:h-[400px] md:w-[400px] lg:h-[500px] lg:w-[500px]">
               {/* التوهج الخلفي */}
               {!shouldReduceMotion && (
                 <motion.div
