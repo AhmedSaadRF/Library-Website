@@ -168,9 +168,9 @@ export function HomeHero() {
 
       <div className="relative z-10 mx-auto max-w-7xl">
         {/* القسم العلوي - النص والصورة */}
-        <div className={`flex flex-col gap-12 ${isRTL ? 'lg:flex-row-reverse' : 'lg:flex-row'} lg:items-center`}>
+        <div className="flex flex-col-reverse gap-12 lg:gap-16 lg:flex-row lg:items-center">
 
-          {/* العمود اليساري: العنوان والنص والأزرار */}
+          {/* العمود الأيسر: العنوان والنص والأزرار */}
           <motion.div
             initial={{ opacity: 0, x: isRTL ? 40 : -40, y: 20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
@@ -218,51 +218,96 @@ export function HomeHero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: animationDuration, delay: 0.4 }}
-              className={`flex flex-wrap gap-4 pt-6 ${isRTL ? 'justify-end' : 'justify-start'}`}
+              className="flex flex-col sm:flex-row flex-wrap gap-5 pt-8"
             >
               {/* زر الشراء الرئيسي */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.08, y: -4 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex-1 min-w-[200px]"
+              >
                 <Link
                   href="/buy"
-                  className="group relative px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg text-white shadow-xl overflow-hidden transition-all duration-300"
+                  className="relative block w-full px-8 py-4 rounded-2xl font-bold text-lg text-white shadow-2xl overflow-hidden group transition-all"
                 >
-                  {/* الخلفية المتحركة */}
-                  <span className="absolute inset-0 bg-gradient-to-r from-brand via-amber-600 to-orange-600 transition-all duration-300" />
+                  {/* الخلفية الرئيسية */}
+                  <span className="absolute inset-0 bg-gradient-to-br from-brand via-amber-600 to-orange-600 transition-all duration-300 group-hover:shadow-2xl" />
+
+                  {/* تأثير التوهج */}
                   {!shouldReduceMotion && (
-                    <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                      animate={{ x: ['100%', '-100%'] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    />
+                    <>
+                      <motion.span
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                        animate={{ x: ['-100%', '100%'] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      />
+                      <motion.span
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-white/20 to-transparent"
+                        transition={{ duration: 0.3 }}
+                      />
+                    </>
                   )}
-                  <span className="relative flex items-center gap-2">
-                    <span>🛍️</span>
+
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    <span className="text-2xl">🛍️</span>
                     <span>{t('hero.ctaBuy')}</span>
                   </span>
                 </Link>
               </motion.div>
 
               {/* زر المكتبة */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.08, y: -4 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex-1 min-w-[200px]"
+              >
                 <Link
                   href="/books"
-                  className="group relative px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg text-brand dark:text-brand-light bg-white/70 dark:bg-slate-900/70 backdrop-blur border-2 border-brand/30 shadow-lg hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all duration-300"
+                  className="relative block w-full px-8 py-4 rounded-2xl font-bold text-lg text-brand dark:text-brand-light shadow-xl overflow-hidden group transition-all border-2 border-brand/40 hover:border-brand/70"
                 >
-                  <span className="flex items-center gap-2">
-                    <span>📚</span>
+                  {/* الخلفية */}
+                  <span className="absolute inset-0 bg-gradient-to-br from-brand/10 via-white/50 to-brand/5 dark:from-slate-700/50 dark:via-slate-800/50 dark:to-slate-900/50" />
+
+                  {/* تأثير على hover */}
+                  {!shouldReduceMotion && (
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100"
+                      animate={shouldReduceMotion ? {} : { x: ['-100%', '100%'] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
+
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    <span className="text-2xl">📚</span>
                     <span>{t('hero.ctaBooks')}</span>
                   </span>
                 </Link>
               </motion.div>
 
               {/* زر الطريق */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.08, y: -4 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex-1 min-w-[200px]"
+              >
                 <Link
                   href="/route"
-                  className="group relative px-8 py-3 md:px-10 md:py-4 rounded-full font-bold text-base md:text-lg text-brand dark:text-brand-light bg-white/70 dark:bg-slate-900/70 backdrop-blur border-2 border-brand/30 shadow-lg hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all duration-300"
+                  className="relative block w-full px-8 py-4 rounded-2xl font-bold text-lg text-brand dark:text-brand-light shadow-xl overflow-hidden group transition-all border-2 border-brand/40 hover:border-brand/70"
                 >
-                  <span className="flex items-center gap-2">
-                    <span>🗺️</span>
+                  {/* الخلفية */}
+                  <span className="absolute inset-0 bg-gradient-to-br from-brand/10 via-white/50 to-brand/5 dark:from-slate-700/50 dark:via-slate-800/50 dark:to-slate-900/50" />
+
+                  {/* تأثير على hover */}
+                  {!shouldReduceMotion && (
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100"
+                      animate={shouldReduceMotion ? {} : { x: ['-100%', '100%'] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  )}
+
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    <span className="text-2xl">🗺️</span>
                     <span>{t('hero.ctaRoute')}</span>
                   </span>
                 </Link>
@@ -275,26 +320,26 @@ export function HomeHero() {
             initial={{ opacity: 0, scale: 0.8, rotateY: -10 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ duration: animationDuration + 0.1, type: 'spring', stiffness: 80 }}
-            className="flex-1 flex justify-center"
+            className="flex-1 flex justify-center items-center"
           >
-            <div className="relative group">
+            <div className="relative group w-full max-w-lg">
               {/* التوهج الخلفي */}
               {!shouldReduceMotion && (
                 <motion.div
-                  className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-brand/30 via-amber-500/20 to-orange-500/30 blur-2xl opacity-75 group-hover:opacity-100 transition-opacity"
-                  animate={{ scale: [0.95, 1.05, 0.95] }}
+                  className="absolute -inset-6 rounded-3xl bg-gradient-to-r from-brand/40 via-amber-500/30 to-orange-500/40 blur-3xl opacity-60 group-hover:opacity-100 transition-opacity"
+                  animate={{ scale: [0.95, 1.08, 0.95] }}
                   transition={{ duration: 4, repeat: Infinity }}
                 />
               )}
 
               {/* الصورة */}
-              <div className="relative mx-auto h-64 w-64 md:h-80 md:w-80 lg:h-96 lg:w-96 overflow-hidden rounded-3xl shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50 backdrop-blur">
+              <div className="relative mx-auto h-80 w-80 md:h-96 md:w-96 lg:h-full lg:w-full lg:max-w-md overflow-hidden rounded-3xl shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50 backdrop-blur">
                 <Image
                   src="/images/herolibrary.png"
                   alt={locale === 'ar' ? 'المكتبة المتنقلة' : 'Mobile Library'}
                   fill
-                  sizes="(max-width: 768px) 80vw, 40vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  sizes="(max-width: 768px) 90vw, 50vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-125"
                   priority
                 />
 
