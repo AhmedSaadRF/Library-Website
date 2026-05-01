@@ -23,7 +23,7 @@ export default function HomePage() {
     <PageShell>
       <div className="space-y-16">
         <HomeHero />
-        <HomeStats />
+        {/* <HomeStats /> */}
 
         <Reveal>
           <section className="grid gap-12 lg:grid-cols-[1fr_0.95fr] items-center">
