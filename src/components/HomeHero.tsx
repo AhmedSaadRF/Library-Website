@@ -38,7 +38,7 @@ function AnimatedCounter({ value, duration = 2 }: { value: number; duration?: nu
 }
 
 export function HomeHero() {
-  const { t, locale } = useTranslation();
+  const { t, locale, dir } = useTranslation(); // نستدعي dir للتحكم في الاتجاه
   const { books } = useBooks();
   const { stops } = useRouteStops();
   const { totalUsers } = useAuth();
@@ -53,20 +53,20 @@ export function HomeHero() {
 
   return (
     <section className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-white/80 to-brand/5 p-6 shadow-glow backdrop-blur dark:from-slate-950/80 dark:to-brand/10 md:p-10 lg:p-16">
-      {/* خلفية زخرفية */}
       <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-brand/5 blur-3xl" />
       <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-amber-500/5 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-6xl">
-        {/* تخطيط مرن: نص + صورة */}
-        <div className="grid gap-12 lg:grid-cols-2 items-center">
-          {/* العمود الأيسر: النصوص والأزرار */}
-          <div className="space-y-8 text-center lg:text-left">
+        {/* تخطيط مرن: نص + صورة مع دعم RTL */}
+        <div className={`grid gap-12 lg:grid-cols-2 items-center ${dir === 'rtl' ? 'lg:grid-flow-dense' : ''}`}>
+          {/* العمود الأيسر (أو الأيمن حسب الاتجاه) */}
+          <div className={`space-y-8 ${dir === 'rtl' ? 'text-right' : 'text-left'} text-center lg:text-left`}>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="hero-gradient-text gradient-text text-5xl font-black leading-tight md:text-6xl lg:text-7xl"
+              style={{ direction: dir === 'rtl' ? 'rtl' : 'ltr' }}
             >
               {locale === 'ar' ? t('brandSlogan') : t('brandSloganAlt')}
             </motion.h1>
@@ -76,6 +76,7 @@ export function HomeHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-lg text-slate-700 dark:text-slate-300"
+              style={{ direction: dir === 'rtl' ? 'rtl' : 'ltr' }}
             >
               {t('hero.subtitle')}
             </motion.p>
@@ -85,11 +86,12 @@ export function HomeHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
               className="text-sm text-slate-600 dark:text-slate-400"
+              style={{ direction: dir === 'rtl' ? 'rtl' : 'ltr' }}
             >
               {t('hero.extraDescription')}
             </motion.p>
 
-            {/* الأزرار بتصميم جديد وواضح */}
+            {/* الأزرار - عرض أفقي مع مسافات وتوسيط على الشاشات الصغيرة */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -98,46 +100,47 @@ export function HomeHero() {
             >
               <Link
                 href="/buy"
-                className="group relative overflow-hidden rounded-full bg-gradient-to-r from-brand to-amber-600 px-8 py-4 text-sm font-black text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                className="group relative overflow-hidden rounded-full bg-gradient-to-r from-brand to-amber-600 px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <ShoppingCart className="size-5" />
                   {t('hero.ctaBuy')}
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className={`size-4 transition-transform group-hover:translate-x-1 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-amber-600 to-brand opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
 
               <Link
                 href="/books"
-                className="group relative overflow-hidden rounded-full border border-brand/30 bg-white/80 px-8 py-4 text-sm font-black text-brand shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-white dark:bg-slate-900/80 dark:text-brand-light dark:hover:bg-slate-900"
+                className="group relative overflow-hidden rounded-full border border-brand/30 bg-white/80 px-6 py-3 text-sm font-black text-brand shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-white dark:bg-slate-900/80 dark:text-brand-light dark:hover:bg-slate-900"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <BookOpen className="size-5" />
                   {t('hero.ctaBooks')}
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className={`size-4 transition-transform group-hover:translate-x-1 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                 </span>
               </Link>
 
               <Link
                 href="/route"
-                className="group relative overflow-hidden rounded-full border border-brand/30 bg-white/80 px-8 py-4 text-sm font-black text-brand shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-white dark:bg-slate-900/80 dark:text-brand-light dark:hover:bg-slate-900"
+                className="group relative overflow-hidden rounded-full border border-brand/30 bg-white/80 px-6 py-3 text-sm font-black text-brand shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-white dark:bg-slate-900/80 dark:text-brand-light dark:hover:bg-slate-900"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <Map className="size-5" />
                   {t('hero.ctaRoute')}
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className={`size-4 transition-transform group-hover:translate-x-1 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                 </span>
               </Link>
             </motion.div>
           </div>
 
-          {/* العمود الأيمن: صورة المكتبة */}
+          {/* العمود الأيمن: صورة المكتبة - تظهر في الجهة المقابلة حسب RTL */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, rotateY: -10 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ delay: 0.3, duration: 0.7, type: 'spring' }}
-            className="relative mx-auto w-full max-w-md lg:max-w-full"
+            className={`relative mx-auto w-full max-w-md lg:max-w-full ${
+              dir === 'rtl' ? 'lg:col-start-1' : ''
+            }`}
           >
             <div className="relative aspect-square overflow-hidden rounded-[2rem] shadow-2xl ring-4 ring-white/50 dark:ring-slate-800/50">
               <Image
@@ -153,7 +156,7 @@ export function HomeHero() {
           </motion.div>
         </div>
 
-        {/* الإحصائيات بتصميم جذاب */}
+        {/* الإحصائيات - تظل مركزة وتتكيف مع الاتجاه */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
