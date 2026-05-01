@@ -8,6 +8,7 @@ import { v4 as uuid } from 'uuid';
 interface AuthContextValue {
   user: User | null;
   isAdmin: boolean;
+  totalUsers: number; // NEW
   login: (email: string, password: string) => { success: boolean; message?: string; role?: 'user' | 'admin' };
   register: (name: string, email: string, password: string, profilePicture?: string) => { success: boolean; message?: string };
   updateProfile: (name: string, profilePicture?: string) => { success: boolean; message?: string };
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   const getUsers = (): StoredUser[] => {
     let users = readStorage<StoredUser[]>('mobile-library-users', []);
@@ -28,7 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const adminExists = users.some(u => u.email === adminEmail);
     
     if (!adminExists) {
-      // حذف أي أدمن سابق (مثل القديم ahmedrfrf@gmail.com) لتجنب التضارب
       users = users.filter(u => u.role !== 'admin');
       const newAdmin: StoredUser = {
         id: uuid(),
@@ -60,8 +61,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return users;
   };
 
+  const updateTotalUsers = () => {
+    const users = getUsers();
+    setTotalUsers(users.length);
+  };
+
   useEffect(() => {
     const users = getUsers();
+    setTotalUsers(users.length);
+
     const savedUser = readStorage<User | null>('mobile-library-user', null);
     if (savedUser) {
       const match = users.find(u => u.id === savedUser.id);
@@ -87,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { password: _, ...safeUser } = found;
     setUser(safeUser);
     writeStorage('mobile-library-user', safeUser);
+    updateTotalUsers();
     return { success: true, role: found.role };
   };
 
@@ -107,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { password: _, ...safeUser } = newUser;
     setUser(safeUser);
     writeStorage('mobile-library-user', safeUser);
+    updateTotalUsers();
     return { success: true };
   };
 
@@ -121,10 +131,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const updatedUser = { ...user, name, profilePicture: profilePicture ?? user.profilePicture };
     setUser(updatedUser);
     writeStorage('mobile-library-user', updatedUser);
+    updateTotalUsers();
     return { success: true };
   };
 
-  // دالة لتحديث الصورة فقط (بدون كلمة مرور) وتحديث الـ user state
   const updateProfilePicture = async (profilePicture: string | null) => {
     if (!user) return { success: false, message: 'Not logged in' };
     const users = getUsers();
@@ -132,10 +142,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (index === -1) return { success: false, message: 'User not found' };
     users[index].profilePicture = profilePicture;
     writeStorage('mobile-library-users', users);
-    // إنشاء كائن user جديد لتحديث الـ state
     const updatedUser = { ...user, profilePicture };
     setUser(updatedUser);
     writeStorage('mobile-library-user', updatedUser);
+    updateTotalUsers();
     return { success: true };
   };
 
@@ -155,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { password: _, ...safeUser } = currentUser;
     setUser(safeUser);
     writeStorage('mobile-library-user', safeUser);
+    updateTotalUsers();
     return { success: true };
   };
 
@@ -167,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (currentUser.password !== oldPassword) return { success: false, message: 'Incorrect old password' };
     currentUser.password = newPassword;
     writeStorage('mobile-library-users', users);
+    updateTotalUsers();
     return { success: true };
   };
 
@@ -181,6 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       isAdmin,
+      totalUsers,
       login,
       register,
       updateProfile,
@@ -189,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updatePassword,
       logout,
     }),
-    [user]
+    [user, totalUsers]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

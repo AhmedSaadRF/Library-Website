@@ -7,6 +7,7 @@ import { createContext, ReactNode, useContext, useEffect, useMemo, useState } fr
 interface BorrowContextValue {
   borrowCart: string[]; // book IDs
   borrowings: Borrowing[];
+  activeBorrowingsCount: number; // NEW
   addToBorrowCart: (bookId: string) => void;
   removeFromBorrowCart: (bookId: string) => void;
   clearBorrowCart: () => void;
@@ -34,10 +35,15 @@ export function BorrowProvider({ children }: { children: ReactNode }) {
     writeStorage('user-borrowings', borrowings);
   }, [borrowings]);
 
+  const activeBorrowingsCount = useMemo(() => {
+    return borrowings.filter(b => b.status === 'active').length;
+  }, [borrowings]);
+
   const value = useMemo<BorrowContextValue>(
     () => ({
       borrowCart,
       borrowings,
+      activeBorrowingsCount,
       addToBorrowCart: (id) => setBorrowCart((curr) => [...new Set([...curr, id])]),
       removeFromBorrowCart: (id) => setBorrowCart((curr) => curr.filter((i) => i !== id)),
       clearBorrowCart: () => setBorrowCart([]),
@@ -72,7 +78,7 @@ export function BorrowProvider({ children }: { children: ReactNode }) {
         return 60; // 30 days
       }
     }),
-    [borrowCart, borrowings]
+    [borrowCart, borrowings, activeBorrowingsCount]
   );
 
   return <BorrowContext.Provider value={value}>{children}</BorrowContext.Provider>;
